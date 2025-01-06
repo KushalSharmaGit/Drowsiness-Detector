@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 import numpy as np
 from pygame import mixer
+import serial
 import time
 
 mixer.init()
@@ -20,6 +21,12 @@ path = os.getcwd()
 cap = cv2.VideoCapture(0)
 font = cv2.FONT_HERSHEY_COMPLEX_SMALL
 score = 0
+
+arduino = serial.Serial(port='COM11',  baudrate=115200, timeout=.1)
+def write_read(x):
+    arduino.write(bytes(x,  'utf-8'))
+    time.sleep(0.05)
+
 
 while(True):
     ret, frame = cap.read()
@@ -51,12 +58,8 @@ while(True):
             cv2.putText(frame,'Score:'+str(score),(100,height-20), font, 1,(255,255,255),1,cv2.LINE_AA)
             score=score+1
             #print("Close Eyes")
-            if(score > 10):
-                try:
-                    sound.play()
-                except:  # isplaying = False
-                    pass
-
+            if(score > 5):
+                write_read('1')
         #Condition for Open
         elif prediction[0][1] > 0.70:
             score = score - 1
